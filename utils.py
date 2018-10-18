@@ -1,5 +1,6 @@
 from collections import OrderedDict
 import numpy as np
+import theano
 
 def buildCharDictionary(tweets):
 	charcount = OrderedDict()
@@ -52,5 +53,6 @@ if __name__ == "__main__":
 	tweets = ['I am a dog', 'Yao is a cat']
 	chardict, charcount = buildCharDictionary(tweets)
 	twts, mask = encode_data(tweets, chardict)
-	print(twts)
-	print(mask)
+	print(twts.shape)
+	# print(twts)
+	# print(mask)

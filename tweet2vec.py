@@ -1,4 +1,5 @@
 from lasagne.layers import InputLayer, Gate, GRULayer, DenseLayer, SliceLayer, EmbeddingLayer, ElemwiseSumLayer, get_output
+from collections import OrderedDict
 import theano
 import theano.tensor as T
 import lasagne
@@ -7,7 +8,7 @@ import numpy as np
 EMBEDDING_DIM = 150
 HIDDEN_DIM = 500
 N_BATCH = 64
-MAX_LENGTH = 100
+MAX_LENGTH = 200
 TWEET_DIM = 500
 REGULAIZATION = 0.0001
 LEARNING_RATE = 0.01
@@ -19,7 +20,7 @@ class Tweet2Vec:
 		self.n_class = n_class
 
 		E = np.random.uniform(-np.sqrt(1 / EMBEDDING_DIM), np.sqrt(1 / EMBEDDING_DIM), (n_char, EMBEDDING_DIM))
-		U = np.random.uniform(-np.sqrt(1 / HIDDEN_DIM), np.sqrt(1 / HIDDEN_DIM), (6, EMBEDDING_DIM, HIDDEN_DIM))
+		U = np.random.uniform(-np.sqrt(1 / HIDDEN_DIM), np.sqrt(1 / HIDDEN_DIM), (6, HIDDEN_DIM, HIDDEN_DIM))
 		W = np.random.uniform(-np.sqrt(1 / HIDDEN_DIM), np.sqrt(1 / HIDDEN_DIM), (6, EMBEDDING_DIM, HIDDEN_DIM))
 		W_d = np.random.uniform(-np.sqrt(1 / TWEET_DIM), np.sqrt(1 / TWEET_DIM), (2, HIDDEN_DIM, TWEET_DIM))
 		W_s = np.random.uniform(-np.sqrt(1 / n_class), np.sqrt(1 / n_class), (TWEET_DIM, n_class))
@@ -39,9 +40,9 @@ class Tweet2Vec:
 		self.__build__()
 
 	def __build__(self):
-		tweets = T.itensor3()
-		targets = T.ivector()
-		masks = T.imatrix()
+		tweets = T.itensor3('tweets')
+		masks = T.imatrix('masks')
+		targets = T.ivector('targets')
 
 		# Tweets input layer
 		l_in = InputLayer(shape=(N_BATCH, MAX_LENGTH, 1), input_var=tweets, name='l_in')
@@ -90,9 +91,22 @@ class Tweet2Vec:
 		# SGD + Nesterov Momentum
 		updates = lasagne.updates.nesterov_momentum(cost, lasagne.layers.get_all_params(l_res), LEARNING_RATE, momentum=MOMENTUM)
 
-		self.train = theano.function(inputs=[tweets, masks, targets], outputs=cost, updates=updates)
+		self.train = theano.function(inputs=[tweets, masks, targets], outputs=cost, updates=updates, allow_input_downcast=True)
 		self.predict = theano.function(inputs=[tweets, masks], outputs=prediction)
 
+	def getParams(self):
+		params = OrderedDict()
+
+		params['W'] = self.W.get_value()
+		params['E'] = self.E.get_value()
+		params['U'] = self.U.get_value()
+		params['W_d'] = self.W_d.get_value()
+		params['W_s'] = self.W_s.get_value()
+		params['b'] = self.b.get_value()
+		params['b_s'] = self.b_s.get_value()
+		params['h'] = self.h.get_value()
+
+		return params
 
 if __name__ == "__main__":
 	a = Tweet2Vec(200, 200)
