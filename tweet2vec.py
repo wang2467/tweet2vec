@@ -108,6 +108,16 @@ class Tweet2Vec:
 
 		return params
 
+	def setParams(self, params):
+		self.W.set_value(params['W'])
+		self.E.set_value(params['E'])
+		self.U.set_value(params['U'])
+		self.W_d.set_value(params['W_d'])
+		self.W_s.set_value(params['W_s'])
+		self.b.set_value(params['b'])
+		self.b_s.set_value(params['b_s'])
+		self.h.set_value(params['h'])
+
 if __name__ == "__main__":
 	a = Tweet2Vec(200, 200)
 
