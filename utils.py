@@ -40,7 +40,7 @@ def buildLabelDictionary(labels):
 
 	labeldict = OrderedDict()
 	for idx, label in enumerate(labelrank):
-		labeldict[label[0]] = idx + 1
+		labeldict[label[0]] = idx
 
 	# write label lookup dictionary to file
 	with open('./res/labeldict.pkl', 'wb') as myFile:
